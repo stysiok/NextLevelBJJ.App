@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Dimensions, LayoutAnimation, Text, View, StatusBar, StyleSheet } from 'react-native';
+import { Dimensions, LayoutAnimation, Text, View, StatusBar, StyleSheet, ActivityIndicator } from 'react-native';
 import { BarCodeScanner, Permissions } from 'expo';
 import { GraphQLFetch } from '../extensions/GraphQL';
 
@@ -7,6 +7,7 @@ export default class App extends Component {
   state = {
     hasCameraPermission: null,
     lastScannedValue: null,
+    isLoading: false
   };
 
   componentDidMount() {
@@ -21,7 +22,8 @@ export default class App extends Component {
   };
 
   _handleBarCodeRead = async(result) => {
-    console.log(result);
+    this.setState({ isLoading: true });
+
     if (result.data !== this.state.lastScannedValue) {
       LayoutAnimation.spring();
       this.setState({ lastScannedValue: result.data });
@@ -33,36 +35,47 @@ export default class App extends Component {
         lastName
       }
     }`);
-    console.log(data.data.getStudentByPassId.firstName);
+
+    if(data.data){
+      this.props.navigation.navigate('Main');
+    }
   };
 
   render() {
-    return (
-      <View style={styles.container}>
-        {this.state.hasCameraPermission === null
-          ? <Text>Potrzebujemy Twojego aparatu, żeby zeskanować Twój kod QR.</Text>
-          : this.state.hasCameraPermission === false
-              ? <Text style={{ color: '#fff' }}>
-                  Nie dałeś udzieliłeś przyzwolenia, więc jak chcesz zczytać informację o karnecie?
-                </Text>
-              : <BarCodeScanner
-                  onBarCodeRead={this._handleBarCodeRead}
-                  style={StyleSheet.absoluteFill}>
-                  <View style={styles.margins}>
-                  <Text style={styles.topText}>Zeskanuj swój kod QR z karnetu</Text>
-                  </View>
-                  <View style={styles.inside}>
-                    <View style={styles.side}></View>
-                    <View style={styles.highlight}></View>
-                    <View style={styles.side}></View>
-                  </View>
-                  <View style={styles.margins}>
-                  <Text style={styles.bottomText} onPress={() => this.props.navigation.pop()}>Powrót</Text>
-                  </View>
-                  </BarCodeScanner>}
-        <StatusBar />
+    if(!this.state.isLoading){
+      return (
+        <View style={styles.container}>
+          {this.state.hasCameraPermission === null
+            ? <Text>Potrzebujemy Twojego aparatu, żeby zeskanować Twój kod QR.</Text>
+            : this.state.hasCameraPermission === false
+                ? <Text style={{ color: '#fff' }}>
+                    Nie dałeś udzieliłeś przyzwolenia, więc jak chcesz zczytać informację o karnecie?
+                  </Text>
+                : <BarCodeScanner
+                    onBarCodeRead={this._handleBarCodeRead}
+                    style={StyleSheet.absoluteFill}>
+                    <View style={styles.margins}>
+                    <Text style={styles.topText}>Zeskanuj swój kod QR z karnetu</Text>
+                    </View>
+                    <View style={styles.inside}>
+                      <View style={styles.side}></View>
+                      <View style={styles.highlight}></View>
+                      <View style={styles.side}></View>
+                    </View>
+                    <View style={styles.margins}>
+                    <Text style={styles.bottomText} onPress={() => this.props.navigation.pop()}>Powrót</Text>
+                    </View>
+                    </BarCodeScanner>}
+          <StatusBar />
+        </View>
+      );
+    }else{
+      return(
+      <View style={[indicatorStyles.container, indicatorStyles.horizontal]}>
+        <ActivityIndicator size="large" color="#000" />
       </View>
-    );
+      );
+    }
   }
 }
 
@@ -104,5 +117,16 @@ const styles = StyleSheet.create({
   },
   highlight: {
     flex: 8
+  }
+});
+const indicatorStyles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center'
+  },
+  horizontal: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    padding: 10
   }
 });

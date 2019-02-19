@@ -1,9 +1,8 @@
-import React from 'react';
-
 import { createStackNavigator, createAppContainer } from 'react-navigation';
 
 import Home from './screens/Home';
 import CodeScanner from './screens/CodeScanner';
+import Main from './screens/Main';
 
 const RootStack = createStackNavigator(
   {
@@ -18,10 +17,23 @@ const RootStack = createStackNavigator(
       navigationOptions: {
         header: null
       }
-    }
+    },
+    Main: {
+      screen: Main      
+    },
   },
   {
-    initialRouteName: 'Home'
+    initialRouteName: 'Home',
+    defaultNavigationOptions: {
+      title: "Next Level BJJ",
+      headerStyle: {
+        backgroundColor: '#000',
+      },
+      headerTintColor: '#fff',
+      headerTitleStyle: {
+        fontWeight: 'bold',
+      }
+    }
   }
 );
 
