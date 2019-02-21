@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { Dimensions, LayoutAnimation, Text, View, StatusBar, StyleSheet, ActivityIndicator } from 'react-native';
 import { BarCodeScanner, Permissions } from 'expo';
 import { GraphQLFetch } from '../extensions/GraphQL';
+import Activity from './sharedScreens/Activity';
 
 export default class App extends Component {
   state = {
@@ -71,9 +72,7 @@ export default class App extends Component {
       );
     }else{
       return(
-      <View style={[indicatorStyles.container, indicatorStyles.horizontal]}>
-        <ActivityIndicator size="large" color="#000" />
-      </View>
+      <Activity headerText="Wczytuje klubowicza"></Activity>
       );
     }
   }

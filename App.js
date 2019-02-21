@@ -3,6 +3,7 @@ import { createStackNavigator, createAppContainer } from 'react-navigation';
 import Home from './screens/Home';
 import CodeScanner from './screens/CodeScanner';
 import Main from './screens/Main';
+import Activity from './screens/sharedScreens/Activity'
 
 const RootStack = createStackNavigator(
   {
@@ -21,6 +22,10 @@ const RootStack = createStackNavigator(
     Main: {
       screen: Main      
     },
+    Activity: {
+      screen: Activity,
+      header: null
+    }
   },
   {
     initialRouteName: 'Home',
