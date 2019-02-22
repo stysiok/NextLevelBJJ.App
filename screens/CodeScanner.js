@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Dimensions, LayoutAnimation, Text, View, StatusBar, StyleSheet, ActivityIndicator } from 'react-native';
 import { BarCodeScanner, Permissions } from 'expo';
-import { GraphQLFetch } from '../extensions/GraphQL';
+import { graphQLFetch } from '../extensions/GraphQL';
 import Activity from './sharedScreens/Activity';
 
 export default class App extends Component {
@@ -29,16 +29,26 @@ export default class App extends Component {
       LayoutAnimation.spring();
       this.setState({ lastScannedValue: result.data });
     }
-
-    var data = await GraphQLFetch(`{
-      getStudentByPassId(passCode:"NL096") {
-        firstName
-        lastName
+    
+    var response = await graphQLFetch(`{
+      getStudentByPassId(passCode:"${result.data}") {
+        id
+        passCode
       }
     }`);
 
-    if(data.data){
-      this.props.navigation.navigate('Main');
+    if (!response && response.data.getStudentByPassId != null) {
+      this.props.navigation.navigate('Main', {
+        student: response.data.getStudentByPassId
+      });
+    } else {
+      this.setState({
+        isLoading: false
+      });
+      this.props.navigation.navigate('Error', {
+        headerText: response.Message ? "Błąd podczas pobierania klubowicza" : "Podano błędny kod",
+        text: response.Message ? response.Message : "Nie znalaziono klubowicza, który jest przypisany do podanego kodu"
+      });
     }
   };
 
