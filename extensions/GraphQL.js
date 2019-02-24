@@ -1,4 +1,4 @@
-export const GraphQLFetch = async(query) => {
+export const graphQLFetch = async(query) => {
     try {
         let response = await fetch('http://nextlevelbjjtest.azurewebsites.net/graphql/', {
             method: 'POST',

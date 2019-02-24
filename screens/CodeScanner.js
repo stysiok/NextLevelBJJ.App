@@ -34,10 +34,11 @@ export default class App extends Component {
       getStudentByPassId(passCode:"${result.data}") {
         id
         passCode
+        firstName
       }
     }`);
 
-    if (!response && response.data.getStudentByPassId != null) {
+    if (response.data.getStudentByPassId != null) {
       this.props.navigation.navigate('Main', {
         student: response.data.getStudentByPassId
       });
@@ -80,7 +81,7 @@ export default class App extends Component {
           <StatusBar />
         </View>
       );
-    }else{
+    } else {
       return(
       <Activity headerText="Wczytuje klubowicza"></Activity>
       );
