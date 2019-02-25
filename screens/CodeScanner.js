@@ -31,16 +31,16 @@ export default class App extends Component {
     }
     
     var response = await graphQLFetch(`{
-      getStudentByPassId(passCode:"${result.data}") {
+      student(passCode:"${result.data}") {
         id
         passCode
         firstName
       }
     }`);
 
-    if (response.data.getStudentByPassId != null) {
+    if (response.data.student != null) {
       this.props.navigation.navigate('Main', {
-        student: response.data.getStudentByPassId
+        student: response.data.student
       });
     } else {
       this.setState({

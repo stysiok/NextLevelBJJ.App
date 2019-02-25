@@ -5,6 +5,7 @@ import CodeScanner from './screens/CodeScanner';
 import Main from './screens/Main';
 import Activity from './screens/sharedScreens/Activity';
 import Error from './screens/sharedScreens/Error';
+import Schedule from './screens/Schedule';
 
 const RootStack = createStackNavigator(
   {
@@ -26,6 +27,9 @@ const RootStack = createStackNavigator(
     Activity: {
       screen: Activity,
       header: null
+    },
+    Schedule: {
+      screen: Schedule
     },
     Error: {
       screen: Error,

@@ -26,8 +26,6 @@ export default class Main extends React.Component {
         const { navigation } = this.props;
         const student = navigation.getParam('student');
         
-        console.log(student);
-
         return (
         <Container>
             <StatusBar />
@@ -38,23 +36,23 @@ export default class Main extends React.Component {
             </View>
             <View style={styles.buttons}>
             <Button iconLeft large style={styles.button}>
-                <MaterialCommunityIcons name="account-card-details" size={32} color="white" />
+                <Icon name="account-card-details" type="MaterialCommunityIcons" />
                 <Text> Karnet </Text>
             </Button>
-            <Button iconLeft large style={styles.button}>
-                <MaterialCommunityIcons name="calendar-clock" size={32} color="white" />
+            <Button iconLeft large style={styles.button} onPress={() => {this.props.navigation.navigate('Schedule')}}>
+                <Icon name="calendar-clock" type="MaterialCommunityIcons"/>
                 <Text> Grafik </Text>
             </Button>
             <Button iconLeft large style={styles.button}>
-                <MaterialCommunityIcons name="currency-usd" size={32} color="white" />
+                <Icon name="currency-usd"  type="MaterialCommunityIcons" />
                 <Text> Cennik </Text>
             </Button>
             <Button iconLeft large style={styles.button}>
-                <MaterialCommunityIcons name="calendar-multiselect" size={32} color="white"/>
+                <Icon name="calendar-multiselect" type="MaterialCommunityIcons" />
                 <Text> Historia </Text>
             </Button>
             <Button bordered dark iconLeft style={[styles.button, styles.leave]}>
-                <MaterialCommunityIcons name="exit-run" size={32} color="black" />
+                <Icon name="exit-run"  type="MaterialCommunityIcons" color="black" />
                 <Text> Wyloguj </Text>
             </Button>
             </View>
