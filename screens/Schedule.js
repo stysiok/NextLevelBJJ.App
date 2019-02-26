@@ -1,9 +1,10 @@
 import React from 'react';
-import { View, StyleSheet, StatusBar, Image, FlatList } from 'react-native';
-import { Container, Text } from 'native-base';
+import { View, StyleSheet, StatusBar, Image, FlatList, Text } from 'react-native';
+import { Container, Accordion, Content } from 'native-base';
 import { graphQLFetch } from '../extensions/GraphQL';
 import Activity from './sharedScreens/Activity';
 
+let today, week;
 export default class Main extends React.Component { 
     constructor(){
         super();
@@ -16,6 +17,8 @@ export default class Main extends React.Component {
         await this.getTrainingDay();
         await this.getTrainingWeek();
         
+        week.trainings = week.trainings.filter(el => el.classes.length > 0);
+        week.trainings.forEach(tr => tr.classes.forEach(cl => console.log(cl.startHour)));
         this.setState({ isLoading: false });
     }
 
@@ -63,7 +66,7 @@ export default class Main extends React.Component {
             });
         }
     }
-
+    
     render(){
         if(this.state.isLoading){
             return(
@@ -73,29 +76,35 @@ export default class Main extends React.Component {
             return (
                 <Container>
                     <StatusBar />
-                        <Image style={bgStyles.backgroundImage} source={require('../assets/images/welcomeBg.jpg')}/>
-                        <View style={bgStyles.overlay} />
+                        <Image style={styles.backgroundImage} source={require('../assets/images/welcomeBg.jpg')}/>
+                        <View style={styles.overlay} />
                         <View style={styles.today}>
-                            <View style={[styles.today, styles.boxHeader]}>
-                                <Text style={styles.heading}>Dziś! ({today.training.day})</Text>
-                            </View>
-                            <View style={[styles.today, styles.boxTodayTrainings]}> 
-                                <FlatList
-                                data={today.training.classes}
-                                renderItem={({item}) => <Text style={styles.training}> {item.startHour} - {item.finishHour} {item.name}</Text>} />
-                            </View>
-                           </View>
+                            <Text style={styles.heading}>Dziś! ({today.training.day})</Text>
+                            <FlatList
+                            data={today.training.classes}
+                            keyExtractor={item => item.name}
+                            renderItem={({item}) => <Text style={styles.training}> {item.startHour} - {item.finishHour} {item.name}</Text>} />
+                        </View>
                         <View style={styles.week}>
-                            <Text>Pełen tydzień!</Text>
+                            <Text style={styles.heading}>Pełen tydzień!</Text>
+                            <FlatList
+                            data={week.trainings}
+                            keyExtractor={item => item.day}
+                            renderItem={({item}) => 
+                                    <View>
+                                    <Text style={styles.heading}>{item.day}</Text>
+                                    <FlatList
+                                        data={item.classes}
+                                        keyExtractor={obj => obj.name}
+                                        renderItem={({item: training}) => <Text style={styles.training}> {training.startHour} - {training.finishHour} {training.name}</Text>} />
+                                    </View>
+                                } />
                         </View>
                 </Container>
             );
         }
     }
 }
-
-let today;
-let week;
 
 const styles = StyleSheet.create({
     today: {
@@ -104,15 +113,17 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center'
     },
-    boxHeader: {
+    backgroundImage: {
         flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center'
+        resizeMode: 'cover',
+        position: 'absolute',
+        width: '100%',
+        height: '100%',
+        justifyContent: 'center'
     },
-    boxTodayTrainings: {
-        flex: 2,
-        justifyContent: 'space-around',
-        alignItems: 'center'
+    overlay: {
+        ...StyleSheet.absoluteFillObject,
+        backgroundColor: 'rgba(0, 0, 0, 0.75)'
     },
     week: {
         flex: 2,
@@ -130,20 +141,5 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         color: 'white',
         fontSize: 15
-    }
-});
-
-const bgStyles = StyleSheet.create({
-    backgroundImage: {
-        flex: 1,
-        resizeMode: 'cover',
-        position: 'absolute',
-        width: '100%',
-        height: '100%',
-        justifyContent: 'center'
-    },
-    overlay: {
-        ...StyleSheet.absoluteFillObject,
-        backgroundColor: 'rgba(0, 0, 0, 0.75)'
     }
 });
