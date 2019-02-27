@@ -61,16 +61,6 @@ export default class Main extends React.Component {
 }
 
 const styles = StyleSheet.create({
-    cont: {
-        flex: 1,
-        justifyContent: 'space-around',
-        alignItems: 'center',
-        
-    },
-    btn: {
-        flex: 1,
-        justifyContent: 'center'
-    },
     backgroundImage: {
         flex: 1,
         resizeMode: 'cover',
