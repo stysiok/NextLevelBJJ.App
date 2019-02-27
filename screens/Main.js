@@ -1,7 +1,6 @@
 import React from 'react';
-import { ActivityIndicator, View, StyleSheet, StatusBar, Image, ScrollView } from 'react-native';
-import { Container, Button, Text, Content, Icon } from 'native-base';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { View, StyleSheet, StatusBar, Image } from 'react-native';
+import { Container, Button, Text, Icon } from 'native-base';
 
 export default class Main extends React.Component { 
     constructor(){
@@ -35,7 +34,7 @@ export default class Main extends React.Component {
                 <Text style={styles.greeting}>Oss {student.firstName}!</Text>
             </View>
             <View style={styles.buttons}>
-            <Button iconLeft large style={styles.button}>
+            <Button iconLeft large style={styles.button} onPress={() => { this.props.navigation.navigate('Pass', { passCode: student.passCode })}}>
                 <Icon name="account-card-details" type="MaterialCommunityIcons" />
                 <Text> Karnet </Text>
             </Button>

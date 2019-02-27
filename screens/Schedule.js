@@ -18,7 +18,7 @@ export default class Main extends React.Component {
         await this.getTrainingWeek();
         
         week.trainings = week.trainings.filter(el => el.classes.length > 0);
-        week.trainings.forEach(tr => tr.classes.forEach(cl => console.log(cl.startHour)));
+        
         this.setState({ isLoading: false });
     }
 
