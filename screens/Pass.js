@@ -1,9 +1,10 @@
 import React from 'react';
-import { View, StyleSheet, StatusBar, Image, Text } from 'react-native';
-import { Container, Icon } from 'native-base';
+import { View, StyleSheet, StatusBar, Image } from 'react-native';
+import { Container, Icon, Button, Text } from 'native-base';
 import { graphQLFetch } from '../extensions/GraphQL';
 import moment from 'moment';
 import Activity from './sharedScreens/Activity';
+import Training from './components/Training';
 
 let student;
 export default class Main extends React.Component { 
@@ -87,12 +88,21 @@ export default class Main extends React.Component {
                             <Text style={styles.passInfo}>
                                 <Icon name="calendar-multiselect" type="MaterialCommunityIcons" style={styles.icon} /> 
                                 Pozostało wejść : {student.recentPass.remainingEntries < 31 ? student.recentPass.remainingEntries : "brak limitu" }</Text>
+                            <Text style={styles.passInfo}><Icon name="calendar" type="MaterialCommunityIcons" style={styles.icon} /> 
+                            Ostatni odbyty trening : </Text>
                         </View>
                         <View style={styles.lastAttendanceContainer}>
-                            <Text>PLACEHOLDER FOR LAST ATTENDANCE</Text>
+                            <Training attendance={student.lastAttendance} />
                         </View>
-                        <View style={styles.lastAttendanceContainer}>
-                            <Text>PLACEHOLDER FOR TWO BUTTONS (GENERATE QR CODE / SIGN TO CURRENT CLASS)</Text>
+                        <View style={styles.buttonsContainer}>
+                            <Button block iconLeft style={styles.button}>
+                                <Icon name="account-multiple-check" type="MaterialCommunityIcons" />
+                                <Text> Zapisz się </Text>
+                            </Button>
+                            <Button block iconLeft style={styles.button}>
+                                <Icon name="qrcode" type="MaterialCommunityIcons" />
+                                <Text> Wygeneruj </Text>
+                            </Button>
                         </View>
                 </Container>
             );
@@ -125,7 +135,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold'
     },
     passInfoContainer:{
-        flex: 2,
+        flex: 3,
         justifyContent: 'space-around',
         alignItems: 'center'
     },
@@ -139,8 +149,28 @@ const styles = StyleSheet.create({
         color: "white"
     },
     lastAttendanceContainer:{
+        flex: 2,
+        justifyContent: 'space-around',
+    },
+    center:{
         flex: 1,
         justifyContent: 'center',
+        alignItems: 'center',
+    },
+    lastAttendance:{
+        backgroundColor: 'transparent',
+        color: '#ffffff',
+        fontSize: 25,
+    },
+    buttonsContainer:{
+        flex: 1,
+        flexDirection: 'row',
+        justifyContent: 'space-around',
         alignItems: 'center'
+    },
+    button:{
+        alignSelf: 'center',
+        color: "white",
+        backgroundColor: 'black'
     },
 });
