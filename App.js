@@ -7,6 +7,8 @@ import Activity from './screens/sharedScreens/Activity';
 import Error from './screens/sharedScreens/Error';
 import Schedule from './screens/Schedule';
 import Pass from './screens/Pass';
+import PriceList from './screens/PriceList';
+import Attendances from './screens/Attendances';
 
 const RootStack = createStackNavigator(
   {
@@ -34,6 +36,12 @@ const RootStack = createStackNavigator(
     },
     Pass: {
       screen: Pass
+    },
+    PriceList: {
+      screen: PriceList
+    },
+    Attendances: {
+      screen: Attendances
     },
     Error: {
       screen: Error,

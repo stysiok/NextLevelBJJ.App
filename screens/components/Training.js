@@ -1,6 +1,5 @@
 import React from 'react';
-import { StyleSheet } from 'react-native';
-import { Container, Content, Card, CardItem, Left, Thumbnail, Body, Text } from 'native-base';
+import { Content, Card, CardItem, Left, Thumbnail, Body, Text } from 'native-base';
 
 import moment from 'moment';
 

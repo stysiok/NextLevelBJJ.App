@@ -43,12 +43,12 @@ export default class Main extends React.Component {
                 <Text> Grafik </Text>
             </Button>
             <Button iconLeft large style={styles.button}>
-                <Icon name="currency-usd"  type="MaterialCommunityIcons" />
+                <Icon name="currency-usd"  type="MaterialCommunityIcons" onPress={() => {this.props.navigation.navigate('Attendances', { id: student.id})}}/>
                 <Text> Cennik </Text>
             </Button>
             <Button iconLeft large style={styles.button}>
                 <Icon name="calendar-multiselect" type="MaterialCommunityIcons" />
-                <Text> Historia </Text>
+                <Text> Treningi </Text>
             </Button>
             <Button bordered dark iconLeft style={[styles.button, styles.leave]}>
                 <Icon name="exit-run"  type="MaterialCommunityIcons" color="black" />
