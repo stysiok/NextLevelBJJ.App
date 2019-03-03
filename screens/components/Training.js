@@ -1,11 +1,12 @@
 import React from 'react';
-import { Content, Card, CardItem, Left, Thumbnail, Body, Text } from 'native-base';
+import { View } from 'react-native';
+import { Card, CardItem, Left, Thumbnail, Body, Text, Right, Button, Icon } from 'native-base';
 
 import moment from 'moment';
 
 let attendance;
 let thumbnailImage;
-export default class Training extends React.Component { 
+export default class Training extends React.PureComponent { 
     constructor(props){
         super(props);
         attendance = this.props.attendance;
@@ -14,7 +15,7 @@ export default class Training extends React.Component {
 
     render(){
         return(
-            <Content padder>
+            <View style={{padding: 10}}>
                 <Card>
                     <CardItem>
                         <Left>
@@ -26,7 +27,7 @@ export default class Training extends React.Component {
                         </Left>
                     </CardItem>
                 </Card>
-            </Content>
+            </View>                
         );
     }
 }

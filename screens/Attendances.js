@@ -1,39 +1,65 @@
 import React from 'react';
-import { View, StyleSheet, StatusBar, Image } from 'react-native';
-import { Container, Icon, Button, Text } from 'native-base';
+import { View, StyleSheet, StatusBar, Image, FlatList } from 'react-native';
+import { Container, Text } from 'native-base';
 import { graphQLFetch } from '../extensions/GraphQL';
-import moment from 'moment';
 import Activity from './sharedScreens/Activity';
 import Training from './components/Training';
 
-let attendances;
 export default class Main extends React.Component { 
     constructor(){
         super();
         this.state = {
-            isLoading: true
+            isLoading: true,
+            id: 0,
+            skip: 0,
+            take: 8,
+            attendances: []
         }
     }
     
     componentWillMount = async() => {
-        await this.getAttendances();
+        await this.promisedSetState({id: this.props.navigation.getParam('id')});
 
-        this.setState({ isLoading: false });
-    }
+        let response = await this.getAttendances();
 
-    getAttendances = async() => {
-        let id = this.props.navigation.getParam('id');
-
-        var response = await await graphQLFetch(``);
-
-        if(response.data.attendances != null){
-            attendances = response.data.attendances;
+        if(response.data.attendances != null) {
+            var joined = response.data.attendances;
+            this.setState({ attendances: joined })
         } else {
             this.props.navigation.navigate('Error', {
                 headerText: response.Message ? "Błąd podczas pobierania treningów" : "Nie odbyłeś żadnego treningu",
                 text: response.Message ? response.Message : "Treningi klubowicza nie istnieją w bazie danych"
             });
         }
+        this.setState({ isLoading: false });
+    }
+
+    getAttendances = async() => {
+        return await graphQLFetch(`{ 
+            attendances(studentId: ${this.state.id}, take: ${this.state.take}, skip: ${this.state.skip}){
+                createdDate
+                classAttended{
+                    day
+                    name
+                    startHour
+                    finishHour
+                }
+            }
+        }`);
+    }
+
+    loadAttendances = () => {
+        this.setState({ skip: this.state.skip + this.state.take}, 
+            () => {
+                this.promisedSetState({ skip: this.state.skip + this.state.take }).then(() => {
+                    this.getAttendances().then((response) => {
+                        if(response.data.attendances != null) {
+                            var joined = [...this.state.attendances, ...response.data.attendances];
+                            this.setState({ attendances: joined })
+                        }
+                    })
+                });               
+            });
     }
     
     render(){
@@ -50,9 +76,26 @@ export default class Main extends React.Component {
                         <View style={styles.textBox}>
                             <Text style={styles.greeting}>Odbyte treningi!</Text>
                         </View>
+                        <View style={{flex: 5}}>
+                            <FlatList
+                                data={this.state.attendances}
+                                keyExtractor={item => item.createdDate}
+                                renderItem={({item}) => <Training attendance={item} /> }
+                                onEndReachedThreshold={0.5}
+                                onEndReached={() => this.loadAttendances()}
+                                />
+                        </View>
                 </Container>
             );
         }
+    }
+
+    promisedSetState = (newState) => {
+        return new Promise((resolve) => {
+            this.setState(newState, () => {
+                resolve()
+            });
+        });
     }
 }
 
