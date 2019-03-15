@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Dimensions, LayoutAnimation, Text, View, StatusBar, StyleSheet, ActivityIndicator } from 'react-native';
+import { Dimensions, LayoutAnimation, Text, View, StatusBar, StyleSheet, AsyncStorage } from 'react-native';
 import { BarCodeScanner, Permissions } from 'expo';
 import { graphQLFetch } from '../extensions/GraphQL';
 import Activity from './sharedScreens/Activity';
@@ -39,6 +39,7 @@ export default class App extends Component {
     }`);
 
     if (response.data.student != null) {
+      await AsyncStorage.setItem('student', JSON.stringify(response.data.student));
       this.props.navigation.navigate('Main', {
         student: response.data.student
       });

@@ -1,6 +1,6 @@
 import React from 'react';
 import * as Expo from "expo";
-import { StyleSheet, View, Image, ActivityIndicator } from 'react-native';
+import { StyleSheet, View, Image, ActivityIndicator, AsyncStorage } from 'react-native';
 import { Button, Text, Body } from 'native-base';
 
 export default class Welcome extends React.Component{
@@ -10,9 +10,18 @@ export default class Welcome extends React.Component{
             isReady: false
         };
     }
-    componentWillMount() {
-        this.loadFonts();
+
+    async componentWillMount() {
+        await this.loadFonts();
+
+        let student = await AsyncStorage.getItem('student');
+        if(student !== null){
+            await this.props.navigation.navigate('Main', {
+                student: JSON.parse(student)
+              });
+        }
     }
+
     async loadFonts() {
         await Expo.Font.loadAsync({
             Roboto: require("native-base/Fonts/Roboto.ttf"),

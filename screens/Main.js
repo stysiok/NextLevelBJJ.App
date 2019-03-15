@@ -1,6 +1,7 @@
 import React from 'react';
-import { View, StyleSheet, StatusBar, Image } from 'react-native';
+import { Alert, AsyncStorage,View, StyleSheet, StatusBar, Image } from 'react-native';
 import { Container, Button, Text, Icon } from 'native-base';
+import { HeaderBackButton } from 'react-navigation';
 
 export default class Main extends React.Component { 
     constructor(){
@@ -9,6 +10,28 @@ export default class Main extends React.Component {
             isLoading: false
         };
     }
+
+    static navigationOptions = ({navigation}) => {
+        return{
+          headerLeft:(<HeaderBackButton onPress={() => {
+
+Alert.alert(
+            'Wyloguj się',
+            'Czy na pewno chcesz się wylogować z aplikacji? Będziesz ponownie musiał/a zeskanować swój kod QR.',
+            [
+              {
+                text: 'Tak',
+                onPress: async() => {
+                    await AsyncStorage.removeItem('student', () => navigation.navigate('Home'))
+                },
+              },
+              { text: 'Nie', onPress: () => {} },
+            ],
+            { cancellable: false }
+          );
+          }} tintColor={'white'}/>)
+       }
+      }
 
     componentWillMount() {
         this.loadFonts();
@@ -19,6 +42,23 @@ export default class Main extends React.Component {
             Roboto_medium: require("native-base/Fonts/Roboto_medium.ttf"),
             MaterialCommunityIcons: require("@expo/vector-icons/fonts/MaterialCommunityIcons.ttf")
         });
+    }
+
+    static logOut = async() => {
+        Alert.alert(
+            'Wyloguj się',
+            'Czy na pewno chcesz się wylogować z aplikacji? Będziesz ponownie musiał/a zeskanować swój kod QR.',
+            [
+              {
+                text: 'Tak',
+                onPress: async() => {
+                    await AsyncStorage.removeItem('student', () => this.props.navigation.navigate('Home'))
+                },
+              },
+              { text: 'Nie', onPress: () => {} },
+            ],
+            { cancellable: false }
+          );
     }
 
     render(){
@@ -50,7 +90,7 @@ export default class Main extends React.Component {
                 <Icon name="calendar-multiselect" type="MaterialCommunityIcons" />
                 <Text> Treningi </Text>
             </Button>
-            <Button bordered dark iconLeft style={[styles.button, styles.leave]}>
+            <Button bordered dark iconLeft style={[styles.button, styles.leave]} onPress={() => {this.logOut()}}>
                 <Icon name="exit-run"  type="MaterialCommunityIcons" color="black" />
                 <Text> Wyloguj </Text>
             </Button>
