@@ -15,20 +15,20 @@ export default class Main extends React.Component {
         return{
           headerLeft:(<HeaderBackButton onPress={() => {
 
-Alert.alert(
-            'Wyloguj się',
-            'Czy na pewno chcesz się wylogować z aplikacji? Będziesz ponownie musiał/a zeskanować swój kod QR.',
-            [
-              {
-                text: 'Tak',
-                onPress: async() => {
-                    await AsyncStorage.removeItem('student', () => navigation.navigate('Home'))
+                Alert.alert(
+                'Wyloguj się',
+                'Czy na pewno chcesz się wylogować z aplikacji? Będziesz ponownie musiał/a zeskanować swój kod QR.',
+                [
+                {
+                    text: 'Tak',
+                    onPress: async() => {
+                        await AsyncStorage.removeItem('student', () => navigation.navigate('Home'))
+                    },
                 },
-              },
-              { text: 'Nie', onPress: () => {} },
-            ],
-            { cancellable: false }
-          );
+                { text: 'Nie', onPress: () => {} },
+                ],
+                { cancellable: false }
+                );
           }} tintColor={'white'}/>)
        }
       }

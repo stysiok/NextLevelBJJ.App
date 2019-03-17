@@ -1,7 +1,8 @@
 import React from 'react';
-import { View, StyleSheet, StatusBar, Image } from 'react-native';
+import { Alert, View, StyleSheet, StatusBar, Image } from 'react-native';
 import { Container, Icon, Button, Text } from 'native-base';
 import { graphQLFetch } from '../extensions/GraphQL';
+import Modal from 'react-native-modal';
 import moment from 'moment';
 import Activity from './sharedScreens/Activity';
 import Training from './components/Training';
@@ -11,7 +12,8 @@ export default class Main extends React.Component {
     constructor(){
         super();
         this.state = {
-            isLoading: true
+            isLoading: true,
+            modalVisible: false,
         }
     }
     
@@ -24,7 +26,7 @@ export default class Main extends React.Component {
     getStudentPass = async() => {
         let passCode = this.props.navigation.getParam('passCode');
 
-        var response = await await graphQLFetch(`{
+        var response = await graphQLFetch(`{
             student(passCode:"${passCode}"){
                 lastAttendance{
                     createdDate
@@ -56,6 +58,27 @@ export default class Main extends React.Component {
             });
         }
     }
+
+    signInForTraining = async() => {
+        var signInResult = await graphQLFetch(`
+            mutation{
+                signInForTraining(studentId: 2, kidsClassFilter: ${student.recentPass.passType.name == 'Dzieci'})
+            }
+        `);
+        
+        if(signInResult.data != null){
+
+        } else {
+            Alert.alert(
+                'Błąd podczas zapisywania się na trening',
+                signInResult[0].Message,
+                [
+                  { text: 'Ok', onPress: () => {} },
+                ],
+                { cancellable: false }
+              );
+        }
+    }
     
     render(){
         if(this.state.isLoading){
@@ -65,6 +88,11 @@ export default class Main extends React.Component {
         } else {
             return (
                 <Container>
+                    <Modal isVisible={this.state.modalVisible}>
+                        <View style={{ flex: 1 }}>
+                            <Text>I am the modal content!</Text>
+                        </View>
+                    </Modal>
                     <StatusBar />
                         <Image style={styles.backgroundImage} source={require('../assets/images/welcomeBg.jpg')}/>
                         <View style={styles.overlay} />
@@ -95,11 +123,11 @@ export default class Main extends React.Component {
                             <Training attendance={student.lastAttendance} />
                         </View>
                         <View style={styles.buttonsContainer}>
-                            <Button block iconLeft style={styles.button}>
+                            <Button block iconLeft style={styles.button} onPress={() => { this.signInForTraining() }}>
                                 <Icon name="account-multiple-check" type="MaterialCommunityIcons" />
                                 <Text> Zapisz się </Text>
                             </Button>
-                            <Button block iconLeft style={styles.button}>
+                            <Button block iconLeft style={styles.button} onPress={() => { this.setState({ modalVisible: true })}}>
                                 <Icon name="qrcode" type="MaterialCommunityIcons" />
                                 <Text> Wygeneruj </Text>
                             </Button>
