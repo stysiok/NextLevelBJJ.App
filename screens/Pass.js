@@ -6,6 +6,7 @@ import Modal from 'react-native-modal';
 import moment from 'moment';
 import Activity from './sharedScreens/Activity';
 import Training from './components/Training';
+import QRCode from 'react-native-qrcode-svg';
 
 let student;
 export default class Main extends React.Component { 
@@ -88,9 +89,21 @@ export default class Main extends React.Component {
         } else {
             return (
                 <Container>
-                    <Modal isVisible={this.state.modalVisible}>
-                        <View style={{ flex: 1 }}>
-                            <Text>I am the modal content!</Text>
+                    <Modal 
+                        isVisible={this.state.modalVisible}
+                        onBackdropPress={() => this.setState({ modalVisible: false })}
+                        onBackButtonPress={() => this.setState({ modalVisible: false })}
+                        >
+                        <View style={modalStyles.modalContainer}>
+                            <Text>Kod QR Twojego karnetu</Text>
+                            <QRCode 
+                                value={this.props.navigation.getParam('passCode')}
+                                size={200}
+                            />
+                            <Button block iconLeft style={styles.button} onPress={() => { this.setState({ modalVisible: false })}}>
+                                <Icon name="close-circle" type="MaterialCommunityIcons" />
+                                <Text> Zamknij </Text>
+                            </Button>
                         </View>
                     </Modal>
                     <StatusBar />
@@ -201,4 +214,18 @@ const styles = StyleSheet.create({
         color: "white",
         backgroundColor: 'black'
     },
+});
+
+const modalStyles = StyleSheet.create({
+    modalContainer: {
+        flex: 1,
+        alignItems: "center",
+        justifyContent: 'space-around',
+        backgroundColor: "#FFF",
+        borderRadius: 4,
+        borderColor: "#C0C0C0",
+        borderWidth: 2,
+        marginHorizontal: 40,
+        marginVertical: 80
+      }
 });
