@@ -1,7 +1,8 @@
 import React from 'react';
 import * as Expo from "expo";
-import { StyleSheet, View, Image, ActivityIndicator, AsyncStorage } from 'react-native';
+import { StyleSheet, View, Image, AsyncStorage } from 'react-native';
 import { Button, Text, Body } from 'native-base';
+import Activity from './sharedScreens/Activity';
 
 export default class Welcome extends React.Component{
     constructor() {
@@ -16,10 +17,14 @@ export default class Welcome extends React.Component{
 
         let student = await AsyncStorage.getItem('student');
         if(student !== null){
-            await this.props.navigation.navigate('Main', {
+            this.props.navigation.navigate('Main', {
                 student: JSON.parse(student)
               });
         }
+        
+        this.setState({
+            isReady: true
+        });
     }
 
     async loadFonts() {
@@ -27,9 +32,6 @@ export default class Welcome extends React.Component{
             Roboto: require("native-base/Fonts/Roboto.ttf"),
             Roboto_medium: require("native-base/Fonts/Roboto_medium.ttf"),
             Ionicons: require("@expo/vector-icons/fonts/Ionicons.ttf")
-        });
-        this.setState({
-            isReady: true
         });
     }
     
@@ -55,9 +57,7 @@ export default class Welcome extends React.Component{
             );
         }else{
             return(
-                <View style={{flex: 1, padding: 20}}>
-                    <ActivityIndicator />
-                </View>
+                <Activity headerText="Zczytuję ustawienia" />
             );
         }
     }

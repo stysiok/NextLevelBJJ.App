@@ -1,62 +1,114 @@
 import React from 'react';
-import * as Expo from "expo";
-import { StyleSheet, View, Image, ActivityIndicator } from 'react-native';
-import { Button, Text, Body } from 'native-base';
+import { View, StyleSheet, StatusBar, Image, FlatList } from 'react-native';
+import { Container, Card, CardItem, Left, Right, Body, Text, Icon } from 'native-base';
+import { graphQLFetch } from '../extensions/GraphQL';
+import Activity from './sharedScreens/Activity';
 
-export default class Welcome extends React.Component{
-    constructor() {
+let passTypes;
+const icons = [{
+    id: 1,
+    icon: 'chess-pawn'
+}, {
+    id: 2,
+    icon: 'chess-bishop'
+}, {
+    id: 6,
+    icon: 'chess-knight'
+}, {
+    id: 4,
+    icon: 'chess-king'
+}, ];
+
+export default class Main extends React.Component { 
+    constructor(){
         super();
         this.state = {
-            isReady: false
-        };
+            isLoading: true
+        }
     }
-    componentWillMount() {
-        this.loadFonts();
+    
+    componentWillMount = async() => {
+        await this.getPriceList();
+        
+        this.setState({ isLoading: false });
     }
-    async loadFonts() {
-        await Expo.Font.loadAsync({
-            Roboto: require("native-base/Fonts/Roboto.ttf"),
-            Roboto_medium: require("native-base/Fonts/Roboto_medium.ttf"),
-            Ionicons: require("@expo/vector-icons/fonts/Ionicons.ttf")
-        });
-        this.setState({
-            isReady: true
-        });
+
+    getPriceList = async() => {
+        var response = await graphQLFetch(`{
+            passTypes{
+              id
+              name
+              price
+              entries
+              isOpen
+            }
+          }`);
+        console.log(response);
+        if(response.data.passTypes != null){
+            passTypes = response.data.passTypes;
+        } else {
+            this.props.navigation.navigate('Error', {
+                headerText: response.Message ? "Błąd podczas pobierania dnia treningowe" : "Podano błędny kod",
+                text: response.Message ? response.Message : "Nie udało się pobrać dzisiejszego treningu"
+            });
+        }
+    }
+
+    getIconForCarnet = (id) => {
+        let obj = icons.find(c => c.id == id);
+        return obj === undefined ? 'chess-rook' : obj.icon;
     }
     
     render(){
-        if(this.state.isReady){
-            return (
-                <View style={styles.view}>
-                    <Image style={styles.backgroundImage} source={require('../assets/images/welcomeBg.jpg')}/>
-                    <View style={styles.overlay} />
-                    <Image style={styles.logo} source={require('../assets/images/nextLevelLogo.png')}/>
-                    <Text style={styles.header}>
-                        {'Oss Jujiterio!'.toUpperCase()}
-                    </Text>
-                    <Text style={styles.text}>
-                        Witaj w mobilnej aplikacji klubu Next Level Opole. Sprawdzisz tu ważność karnetu, treninigi na które uczęszczałeś czy plan zajęć.
-                    </Text>
-                    <Body style={styles.body}>
-                        <Button primary rounded large style={styles.button} onPress={() => {this.props.navigation.navigate('CodeScanner')}}>
-                            <Text>{' wczytaj karnet '.toUpperCase()}</Text>
-                        </Button>
-                    </Body>
-                </View>
-            );
-        }else{
+        if(this.state.isLoading){
             return(
-                <View style={{flex: 1, padding: 20}}>
-                    <ActivityIndicator />
-                </View>
+                <Activity headerText="Wczytuje dostępne karnety" />
+            );
+        } else {
+            return (
+                <Container>
+                    <StatusBar />
+                        <Image style={styles.backgroundImage} source={require('../assets/images/welcomeBg.jpg')}/>
+                        <View style={styles.overlay} />
+                        <View style={styles.textBox}>
+                            <Text style={styles.greeting}>Dostępne karnety!</Text>
+                        </View>
+                        <View style={{flex: 5}}>
+                            <FlatList 
+                                data={passTypes}
+                                keyExtractor={item => item.id}
+                                renderItem={({item}) => {
+                                    return(
+                                        <View style={{padding: 10}}>
+                                        <Card>
+                                            <CardItem>
+                                                <Left>
+                                                <Icon name={this.getIconForCarnet(item.id)} type="MaterialCommunityIcons" />
+                                                    <Body>
+                                                        <Text>{item.name}</Text>
+                                                        <Text note>Ilość wejść: {item.isOpen ? '∞' : item.entries}</Text>
+                                                    </Body>
+                                                </Left>
+                                                <Right>
+                                                    <Text>{item.price} PLN</Text>
+                                                </Right>
+                                            </CardItem>
+                                        </Card>
+                                    </View>
+                                    );
+                                }}
+                            />
+                        </View>
+                </Container>
             );
         }
     }
 }
 
 const styles = StyleSheet.create({
-    view: {
+    today: {
         flex: 1,
+        backgroundColor: 'transparent',
         justifyContent: 'center',
         alignItems: 'center'
     },
@@ -68,35 +120,19 @@ const styles = StyleSheet.create({
         height: '100%',
         justifyContent: 'center'
     },
-    logo: {
-        alignSelf: 'center',
-        width: '65%',
-        height: '65%',
-        flex: 4
-    },
     overlay: {
         ...StyleSheet.absoluteFillObject,
         backgroundColor: 'rgba(0, 0, 0, 0.75)'
-    },
-    header: {
+    }, 
+    textBox:{
         flex: 1,
-        backgroundColor: 'transparent',
-        textAlign: 'center',
-        color: '#ffffff',
-        fontSize: 40,
-        fontWeight: 'bold'
-    },
-    text: {
-        backgroundColor: 'transparent',
-        textAlign: 'center',
-        color: '#ffffff',
-        fontSize: 20,
-        flex: 2,
-        width: '80%'
-    },
-    body: {
-        flex: 4,
         justifyContent: 'center',
         alignItems: 'center'
-    }    
+    },
+    greeting:{
+        backgroundColor: 'transparent',
+        color: '#ffffff',
+        fontSize: 35,
+        fontWeight: 'bold'
+    },
 });

@@ -44,7 +44,7 @@ export default class Main extends React.Component {
         });
     }
 
-    static logOut = async() => {
+    logOut = async() => {
         Alert.alert(
             'Wyloguj się',
             'Czy na pewno chcesz się wylogować z aplikacji? Będziesz ponownie musiał/a zeskanować swój kod QR.',
@@ -82,7 +82,7 @@ export default class Main extends React.Component {
                 <Icon name="calendar-clock" type="MaterialCommunityIcons"/>
                 <Text> Grafik </Text>
             </Button>
-            <Button iconLeft large style={styles.button}>
+            <Button iconLeft large style={styles.button} onPress={() => {this.props.navigation.navigate('PriceList')}}>
                 <Icon name="currency-usd"  type="MaterialCommunityIcons" />
                 <Text> Cennik </Text>
             </Button>
