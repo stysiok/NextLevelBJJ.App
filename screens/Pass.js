@@ -15,13 +15,12 @@ export default class Main extends React.Component {
         this.state = {
             isLoading: true,
             modalVisible: false,
+            student: null
         }
     }
     
     componentWillMount = async() => {
         await this.getStudentPass();
-
-        this.setState({ isLoading: false });
     }
 
     getStudentPass = async() => {
@@ -52,6 +51,7 @@ export default class Main extends React.Component {
 
         if(response.data.student != null){
             student = response.data.student;
+            this.setState({student: student} , () => this.setState({ isLoading: false }))
         } else {
             this.props.navigation.navigate('Error', {
                 headerText: response.Message ? "Błąd podczas pobierania karnetu" : "Podano błędny kod",
@@ -63,22 +63,27 @@ export default class Main extends React.Component {
     signInForTraining = async() => {
         var signInResult = await graphQLFetch(`
             mutation{
-                signInForTraining(studentId: 2, kidsClassFilter: ${student.recentPass.passType.name == 'Dzieci'})
+                signInForTraining(studentId: 2, kidsClassFilter: ${this.state.student.recentPass.passType.name == 'Dzieci'})
             }
         `);
         
+        let title = "", message = "";
         if(signInResult.data != null){
-
+            title = 'Udanego treningu!'
+            message = 'Udało Ci się zapisać na trening.'
         } else {
-            Alert.alert(
-                'Błąd podczas zapisywania się na trening',
-                signInResult[0].Message,
-                [
-                  { text: 'Ok', onPress: () => {} },
-                ],
-                { cancellable: false }
-              );
+            title = 'Błąd podczas zapisywania się na trening';
+            message = signInResult[0].Message; 
         }
+        
+        Alert.alert(
+            title,
+            message,
+            [
+              { text: 'Ok', onPress: () => {} }
+            ],
+            { cancellable: false }
+        );
     }
     
     render(){
@@ -115,25 +120,25 @@ export default class Main extends React.Component {
                         <View style={styles.passInfoContainer}>
                             <Text style={styles.passInfo}>
                                 <Icon name="chess-king" type="MaterialCommunityIcons" style={styles.icon} /> 
-                                Nazwa karnetu : {student.recentPass.passType.name}
+                                Nazwa karnetu : {this.state.student.recentPass.passType.name}
                             </Text>
                             <Text style={styles.passInfo}>
                                 <Icon name="bank" type="MaterialCommunityIcons" style={styles.icon} /> 
-                                Cena : {student.recentPass.price}zł</Text>
+                                Cena : {this.state.student.recentPass.price}zł</Text>
                             <Text style={styles.passInfo}>
                                 <Icon name="calendar-check" type="MaterialCommunityIcons" style={styles.icon} /> 
-                                Zakupiony : {moment(student.recentPass.createdDate).format('DD/MM/YYYY')}</Text>
+                                Zakupiony : {moment(this.state.student.recentPass.createdDate).format('DD/MM/YYYY')}</Text>
                             <Text style={styles.passInfo}>
                                 <Icon name="calendar-remove" type="MaterialCommunityIcons" style={styles.icon} /> 
-                                Wygaśnie : {moment(student.recentPass.expirationDate).format('DD/MM/YYYY')}</Text>
+                                Wygaśnie : {moment(this.state.student.recentPass.expirationDate).format('DD/MM/YYYY')}</Text>
                             <Text style={styles.passInfo}>
                                 <Icon name="calendar-multiselect" type="MaterialCommunityIcons" style={styles.icon} /> 
-                                Pozostało wejść : {student.recentPass.remainingEntries < 31 ? student.recentPass.remainingEntries : "brak limitu" }</Text>
+                                Pozostało wejść : {this.state.student.recentPass.remainingEntries < 31 ? this.state.student.recentPass.remainingEntries : "brak limitu" }</Text>
                             <Text style={styles.passInfo}><Icon name="calendar" type="MaterialCommunityIcons" style={styles.icon} /> 
                             Ostatni odbyty trening : </Text>
                         </View>
                         <View style={styles.lastAttendanceContainer}>
-                            <Training attendance={student.lastAttendance} />
+                            <Training attendance={this.state.student.lastAttendance} />
                         </View>
                         <View style={styles.buttonsContainer}>
                             <Button block iconLeft style={styles.button} onPress={() => { this.signInForTraining() }}>

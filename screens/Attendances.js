@@ -49,17 +49,18 @@ export default class Main extends React.Component {
     }
 
     loadAttendances = () => {
-        this.setState({ skip: this.state.skip + this.state.take}, 
-            () => {
-                this.promisedSetState({ skip: this.state.skip + this.state.take }).then(() => {
-                    this.getAttendances().then((response) => {
-                        if(response.data.attendances != null) {
-                            var joined = [...this.state.attendances, ...response.data.attendances];
-                            this.setState({ attendances: joined })
-                        }
+        this.promisedSetState({
+            skip: this.state.skip + this.state.take
+        }).then(() => {
+            this.getAttendances().then((response) => {
+                if (response.data.attendances != null) {
+                    var joined = [...this.state.attendances, ...response.data.attendances];
+                    this.setState({
+                        attendances: joined
                     })
-                });               
-            });
+                }
+            })
+        });
     }
     
     render(){

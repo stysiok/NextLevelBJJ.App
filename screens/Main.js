@@ -1,139 +1,219 @@
 import React from 'react';
 import { Alert, AsyncStorage,View, StyleSheet, StatusBar, Image } from 'react-native';
-import { Container, Button, Text, Icon } from 'native-base';
+import { Container, Button, Text, Icon, Content, Card, CardItem, Left, Body } from 'native-base';
+import Activity from './sharedScreens/Activity';
 import { HeaderBackButton } from 'react-navigation';
+import { graphQLFetch } from '../extensions/GraphQL';
+import moment from 'moment';
 
 export default class Main extends React.Component { 
     constructor(){
         super();
         this.state = {
-            isLoading: false
+            isLoading: true,
+            student: null,
+            trainingDay: null
         };
     }
 
-    static navigationOptions = ({navigation}) => {
-        return{
-          headerLeft:(<HeaderBackButton onPress={() => {
+    componentWillMount = async() => {
+        const { navigation } = this.props;
+        const passedStudent = navigation.getParam('student');
 
-                Alert.alert(
-                'Wyloguj się',
-                'Czy na pewno chcesz się wylogować z aplikacji? Będziesz ponownie musiał/a zeskanować swój kod QR.',
-                [
-                {
-                    text: 'Tak',
-                    onPress: async() => {
-                        await AsyncStorage.removeItem('student', () => navigation.navigate('Home'))
-                    },
-                },
-                { text: 'Nie', onPress: () => {} },
-                ],
-                { cancellable: false }
-                );
-          }} tintColor={'white'}/>)
-       }
-      }
+        let studentResponse = await this.fetchStudent(passedStudent.passCode);
+        let trainingDayResponse = await this.fetchTrainingDay();
 
-    componentWillMount() {
-        this.loadFonts();
-    }
-    async loadFonts() {
-        await Expo.Font.loadAsync({
-            Roboto: require("native-base/Fonts/Roboto.ttf"),
-            Roboto_medium: require("native-base/Fonts/Roboto_medium.ttf"),
-            MaterialCommunityIcons: require("@expo/vector-icons/fonts/MaterialCommunityIcons.ttf")
+        this.setState({
+            trainingDay: trainingDayResponse.data.training,
+            student: studentResponse.data.student,
+            isLoading: false
         });
     }
 
-    logOut = async() => {
-        Alert.alert(
-            'Wyloguj się',
-            'Czy na pewno chcesz się wylogować z aplikacji? Będziesz ponownie musiał/a zeskanować swój kod QR.',
-            [
-              {
-                text: 'Tak',
-                onPress: async() => {
-                    await AsyncStorage.removeItem('student', () => this.props.navigation.navigate('Home'))
-                },
-              },
-              { text: 'Nie', onPress: () => {} },
-            ],
-            { cancellable: false }
-          );
+    fetchStudent = async(passCode) => {
+        let response = await graphQLFetch(`
+        {
+            student(passCode: "${passCode}"){
+            firstName
+              recentPass{
+                expirationDate
+                remainingEntries
+                passType{
+                  entries
+                  isOpen
+                }
+              }
+              lastAttendance{
+                classAttended{
+                  day
+                  name
+                  startHour
+                }
+                createdDate
+              }
+            }
+          }
+        `);
+
+        return response;
     }
 
-    render(){
-        const { navigation } = this.props;
-        const student = navigation.getParam('student');
+    fetchTrainingDay = async() => {
+        let response = await graphQLFetch(`{
+            training{
+              classes{
+                day
+                finishHour
+              }
+              day
+            }
+          }`);
         
-        return (
-        <Container>
-            <StatusBar />
-            <Image style={styles.backgroundImage} source={require('../assets/images/welcomeBg.jpg')}/>
-            <View style={styles.overlay} />
-            <View style={styles.textBox}>
-                <Text style={styles.greeting}>Oss {student.firstName}!</Text>
-            </View>
-            <View style={styles.buttons}>
-            <Button iconLeft large style={styles.button} onPress={() => { this.props.navigation.navigate('Pass', { passCode: student.passCode })}}>
-                <Icon name="account-card-details" type="MaterialCommunityIcons" />
-                <Text> Karnet </Text>
-            </Button>
-            <Button iconLeft large style={styles.button} onPress={() => {this.props.navigation.navigate('Schedule')}}>
-                <Icon name="calendar-clock" type="MaterialCommunityIcons"/>
-                <Text> Grafik </Text>
-            </Button>
-            <Button iconLeft large style={styles.button} onPress={() => {this.props.navigation.navigate('PriceList')}}>
-                <Icon name="currency-usd"  type="MaterialCommunityIcons" />
-                <Text> Cennik </Text>
-            </Button>
-            <Button iconLeft large style={styles.button} onPress={() => {this.props.navigation.navigate('Attendances', { id: student.id})}}>
-                <Icon name="calendar-multiselect" type="MaterialCommunityIcons" />
-                <Text> Treningi </Text>
-            </Button>
-            <Button bordered dark iconLeft style={[styles.button, styles.leave]} onPress={() => {this.logOut()}}>
-                <Icon name="exit-run"  type="MaterialCommunityIcons" color="black" />
-                <Text> Wyloguj </Text>
-            </Button>
-            </View>
-        </Container>
-        );
+        return response;
+    }
+
+    render(){        
+        if(this.state.isLoading){
+            if(this.state.student === null) {
+                return ( <Activity headerText="Wczytuję Twoje dane!"/> );
+            } else if (this.state.trainingDay === null){
+                return ( <Activity headerText="Wczytuję dzisiejsze treningi!"/> );
+            }
+            else{
+                return ( <View><Text>Error</Text></View>);
+            }
+        }else if(!this.state.isLoading && 
+            this.state.student !== null && 
+            this.state.trainingDay !== null){
+                let isPassActive = moment(this.state.student.recentPass.expirationDate).isAfter(moment.now);
+                let passActivityText = `${ isPassActive ? 'Aktywny': 'Nieaktywny' } (${ isPassActive ? 'do' : 'od'} ${moment(this.state.student.recentPass.expirationDate).format('DD/MM/YYYY')})`;
+                let passUsageText = `${ isPassActive ? `Pozostało` : `Wykorzystałeś`} ${isPassActive ? `${this.state.student.recentPass.passType.isOpen ? `∞` : `${this.state.student.recentPass.remainingEntries}`}` : `${this.state.student.recentPass.passType.entries - this.state.student.recentPass.remainingEntries}` } z ${this.state.student.recentPass.passType.isOpen ? `∞` : `${this.state.student.recentPass.passType.entries}`} wejść`;
+                return (
+                    <Container style={{backgroundColor: '#121212'}}>
+                        <Content padder>
+                        <StatusBar />
+                        <Text style={styles.greeting}>Oss {this.state.student.firstName}!</Text>
+                        <View style={styles.sectionContainer}>
+                            <View style={styles.sectionHeader}>
+                                <Text style={styles.sectionText}>Aktualny karnet</Text>
+                            </View>
+                            <Content padder>
+                                <Card >
+                                    <CardItem>
+                                            <Body>
+                                                <Text><Icon name={isPassActive ? "check-circle" : "close-circle"} type="MaterialCommunityIcons" /> {passActivityText}</Text>
+                                                <Text><Icon name="calendar-multiselect" type="MaterialCommunityIcons" /> {passUsageText}</Text>
+                                            </Body>
+                                    </CardItem>
+                                </Card>
+                            </Content>
+                        </View>
+                        <View style={styles.sectionContainer}>
+                            <View style={styles.sectionHeader}>
+                                <Text style={styles.sectionText}>Ostatni odbyty trening</Text>
+                            </View>
+                                <Content padder>
+                                   <Card >
+                                        <CardItem>
+                                                <Body>
+                                                    <Text>BJJ nowy nabór</Text>
+                                                    <Text>Poniedziałek o 17:15</Text>
+                                                </Body>
+                                        </CardItem>
+                                    </Card>
+                                </Content>
+                        </View>
+                        <View style={styles.sectionContainer}>
+                            <View style={styles.sectionHeader}>
+                                <Text style={styles.sectionText}>Dzisiejsze zajęcia</Text>
+                            </View>
+                                <Content padder>
+                                   <Card >
+                                        <CardItem>
+                                                <Body>
+                                                    <Text>BJJ nowy nabór</Text>
+                                                    <Text>Poniedziałek o 17:15</Text>
+                                                </Body>
+                                        </CardItem>
+                                        <CardItem>
+                                                <Body>
+                                                    <Text>BJJ nowy nabór</Text>
+                                                    <Text>Poniedziałek o 17:15</Text>
+                                                </Body>
+                                        </CardItem>
+                                        <CardItem>
+                                                <Body>
+                                                    <Text>BJJ nowy nabór</Text>
+                                                    <Text>Poniedziałek o 17:15</Text>
+                                                </Body>
+                                        </CardItem>
+                                    </Card>
+                                </Content>
+                        </View>
+                        </Content>
+                    </Container>
+                );
+        }else{
+            return ( <View><Text>Error</Text></View>);
+        }
     }
 }
 
 const styles = StyleSheet.create({
-    backgroundImage: {
-        flex: 1,
-        resizeMode: 'cover',
-        position: 'absolute',
-        width: '100%',
-        height: '100%',
-        justifyContent: 'center'
-    },
-    overlay: {
-        ...StyleSheet.absoluteFillObject,
-        backgroundColor: 'rgba(0, 0, 0, 0.75)'
-    },
-    textBox:{
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center'
-    },
     greeting:{
-        backgroundColor: 'transparent',
         color: '#ffffff',
         fontSize: 40,
         fontWeight: 'bold'
     },
-    buttons: {
-        flex: 3,
-        justifyContent: 'space-around',
-        alignItems: 'center'
+    sectionContainer: {
+      flex: 1
     },
-    button:{
-        alignSelf: 'center',
-        backgroundColor: 'black'
+    sectionHeader:{
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center'
     },
-    leave:{
-        backgroundColor: 'white',
+    sectionText:{
+        color: '#ffffff',
+        fontSize: 20
     }
 });
+
+// static navigationOptions = ({navigation}) => {
+//     return{
+//       headerLeft:(<HeaderBackButton onPress={() => {
+
+//             Alert.alert(
+//             'Wyloguj się',
+//             'Czy na pewno chcesz się wylogować z aplikacji? Będziesz ponownie musiał/a zeskanować swój kod QR.',
+//             [
+//             {
+//                 text: 'Tak',
+//                 onPress: async() => {
+//                     await AsyncStorage.removeItem('student', () => navigation.navigate('Home'))
+//                 },
+//             },
+//             { text: 'Nie', onPress: () => {} },
+//             ],
+//             { cancellable: false }
+//             );
+//       }} tintColor={'white'}/>)
+//    }
+//   }
+
+// logOut = async() => {
+//     Alert.alert(
+//         'Wyloguj się',
+//         'Czy na pewno chcesz się wylogować z aplikacji? Będziesz ponownie musiał/a zeskanować swój kod QR.',
+//         [
+//           {
+//             text: 'Tak',
+//             onPress: async() => {
+//                 await AsyncStorage.removeItem('student', () => this.props.navigation.navigate('Home'))
+//             },
+//           },
+//           { text: 'Nie', onPress: () => {} },
+//         ],
+//         { cancellable: false }
+//       );
+// }

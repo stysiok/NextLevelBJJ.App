@@ -26,9 +26,9 @@ export default class Activity extends Component {
 }
 
 const footerTexts = ['Stabilizuje boczną', 
-                    'Łapie chwyty', 'Wpinam haki', 
+                    'Łapię chwyty', 'Wpinam haki', 
                     'Utrzymuje dosiad', 'Rozpłaszczam półgardę', 
-                    'Atakuję nogi', 'Poprawiam Gi']; 
+                    'Atakuję nogi', 'Poprawiam Gi', 'Raz Dwa Trzy *clap*']; 
 
 const styles = StyleSheet.create({
     mainView: {
