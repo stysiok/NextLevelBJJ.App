@@ -1,14 +1,30 @@
-import { createStackNavigator, createAppContainer, createDrawerNavigator } from 'react-navigation';
+import React from 'react';
+import { Text, SafeAreaView, ScrollView, ImageBackground, View } from 'react-native';
+import { Icon } from 'native-base';
+import { createStackNavigator, createAppContainer, createDrawerNavigator, DrawerItems } from 'react-navigation';
 
 import Home from './screens/Home';
 import CodeScanner from './screens/CodeScanner';
 import Main from './screens/Main';
-import Activity from './screens/sharedScreens/Activity';
-import Error from './screens/sharedScreens/Error';
 import Schedule from './screens/Schedule';
 import Pass from './screens/Pass';
 import PriceList from './screens/PriceList';
 import Attendances from './screens/Attendances';
+
+const CustomDrawerComponent = (props) => (
+  <SafeAreaView style={{flex: 1, backgroundColor: '#121212'}}>
+    <View style={{height: 150}}>
+      <ImageBackground source={require('./assets/images/teamDrawer.jpg')} style={{height: 150, width: 280, justifyContent: 'center', alignItems: 'center'}}>
+        <View style={{position: 'absolute', top: 115, left: 10, right: 0, bottom: 0}}>
+          <Text style={{color: '#FFFFFF', fontSize: 20, fontWeight: 'bold'}}>Next Level BJJ</Text>
+        </View>
+      </ImageBackground>
+    </View>
+    <ScrollView>
+      <DrawerItems {...props} iconContainerStyle={{opacity: 1}} />
+    </ScrollView>
+  </SafeAreaView>
+);
 
 const mainStackNavigator = createStackNavigator({
   Main: {
@@ -18,15 +34,23 @@ const mainStackNavigator = createStackNavigator({
     }
   }
 },{
-  defaultNavigationOptions: {
-    headerStyle: {
-      backgroundColor: '#1F1F1F',
-    },
-    headerTitleStyle:{
-      color: '#FFFFFF'
+  defaultNavigationOptions: ({ navigation }) => {
+    return {
+      headerStyle: {
+        backgroundColor: '#383838',
+      },
+      headerTitleStyle:{
+        color: '#FFFFFF'
+      },
+      headerTintColor: '#FFFFFF',
+      headerLeft: ({ tintColor }) => (
+        <Icon style={{paddingLeft: 10, fontSize: 30, color: tintColor}} 
+          name="menu" 
+          type="MaterialCommunityIcons"
+          onPress={() => navigation.openDrawer()} />
+      )
     }
-  }
-});
+}});
 
 const scheduleStackNavigator = createStackNavigator({
   Schedule: {
@@ -36,15 +60,23 @@ const scheduleStackNavigator = createStackNavigator({
     }
   }
 },{
-  defaultNavigationOptions: {
-    headerStyle: {
-      backgroundColor: '#1F1F1F',
-    },
-    headerTitleStyle:{
-      color: '#FFFFFF'
+  defaultNavigationOptions: ({ navigation }) => {
+    return {
+      headerStyle: {
+        backgroundColor: '#383838',
+      },
+      headerTitleStyle:{
+        color: '#FFFFFF'
+      },
+      headerTintColor: '#FFFFFF',
+      headerLeft: ({ tintColor }) => (
+        <Icon style={{paddingLeft: 10, fontSize: 30, color: tintColor}} 
+          name="menu" 
+          type="MaterialCommunityIcons"
+          onPress={() => navigation.openDrawer()} />
+      )
     }
-  }
-});
+}});
 
 const passStackNavigator = createStackNavigator({
   Pass: {
@@ -54,15 +86,23 @@ const passStackNavigator = createStackNavigator({
     }
   }
 },{
-  defaultNavigationOptions: {
-    headerStyle: {
-      backgroundColor: '#1F1F1F',
-    },
-    headerTitleStyle:{
-      color: '#FFFFFF'
+  defaultNavigationOptions: ({ navigation }) => {
+    return {
+      headerStyle: {
+        backgroundColor: '#383838',
+      },
+      headerTitleStyle:{
+        color: '#FFFFFF'
+      },
+      headerTintColor: '#FFFFFF',
+      headerLeft: ({ tintColor }) => (
+        <Icon style={{paddingLeft: 10, fontSize: 30, color: tintColor}} 
+          name="menu" 
+          type="MaterialCommunityIcons"
+          onPress={() => navigation.openDrawer()} />
+      )
     }
-  }
-});
+}});
 
 const priceListStackNavigator = createStackNavigator({
   PriceList: {
@@ -72,15 +112,23 @@ const priceListStackNavigator = createStackNavigator({
     }
   }
 },{
-  defaultNavigationOptions: {
-    headerStyle: {
-      backgroundColor: '#1F1F1F',
-    },
-    headerTitleStyle:{
-      color: '#FFFFFF'
+  defaultNavigationOptions: ({ navigation }) => {
+    return {
+      headerStyle: {
+        backgroundColor: '#383838',
+      },
+      headerTitleStyle:{
+        color: '#FFFFFF'
+      },
+      headerTintColor: '#FFFFFF',
+      headerLeft: ({ tintColor }) => (
+        <Icon style={{paddingLeft: 10, fontSize: 30, color: tintColor}} 
+          name="menu" 
+          type="MaterialCommunityIcons"
+          onPress={() => navigation.openDrawer()} />
+      )
     }
-  }
-});
+}});
 
 const attendancesStackNavigator = createStackNavigator({
   Attendances: {
@@ -90,47 +138,74 @@ const attendancesStackNavigator = createStackNavigator({
     }
   }
 },{
-  defaultNavigationOptions: {
-    headerStyle: {
-      backgroundColor: '#1F1F1F',
-    },
-    headerTitleStyle:{
-      color: '#FFFFFF'
+  defaultNavigationOptions: ({ navigation }) => {
+    return {
+      headerStyle: {
+        backgroundColor: '#383838',
+      },
+      headerTitleStyle:{
+        color: '#FFFFFF'
+      },
+      headerTintColor: '#FFFFFF',
+      headerLeft: ({ tintColor }) => (
+        <Icon style={{paddingLeft: 10, fontSize: 30, color: tintColor}} 
+          name="menu" 
+          type="MaterialCommunityIcons"
+          onPress={() => navigation.openDrawer()} />
+      )
     }
-  }
-});
+}});
 
 const menuDrawerNavigator = createDrawerNavigator({
   Main: {
     screen: mainStackNavigator,
     navigationOptions: {
-      title: 'Główny',
+      title: 'Ekran główny',
+      drawerIcon: ({tintColor}) => (
+        <Icon name="home" type="MaterialCommunityIcons" style={{fontSize: 24, color: tintColor}}/>
+      )
     }     
   },
   Pass: {
     screen: passStackNavigator,
     navigationOptions: {
       title: 'Twój karnet',
+      drawerIcon: ({tintColor}) => (
+        <Icon name="account-card-details" type="MaterialCommunityIcons" style={{fontSize: 24, color: tintColor}}/>
+      )      
+    },
+    contentOptions: {
+      onItemPress: (routes) => console.log(routes)
     }
   },
   Attendances: {
     screen: attendancesStackNavigator,
     navigationOptions: {
       title: 'Historia treningów',
+      drawerIcon: ({tintColor}) => (
+        <Icon name="calendar-multiselect" type="MaterialCommunityIcons" style={{fontSize: 24, color: tintColor}}/>
+      )
     }
   },
   Schedule: {
     screen: scheduleStackNavigator,
     navigationOptions: {
-      title: 'Grafik',
-    }
+      title: 'Aktualny Grafik',
+      drawerIcon: ({tintColor}) => <Icon name="calendar-clock" type="MaterialCommunityIcons" style={{fontSize: 24, color: tintColor}}/>    }
   },
   PriceList: {
     screen: priceListStackNavigator,
     navigationOptions: {
-      title: 'Cennik',
+      title: 'Cennik karnetów',
+      drawerIcon: ({tintColor}) => <Icon name="currency-usd" type="MaterialCommunityIcons" style={{fontSize: 24, color: tintColor}}/>
     }
   },
+},{
+  contentComponent: CustomDrawerComponent,
+  contentOptions: {
+    inactiveTintColor: '#FFFFFF',
+    activeTintColor: '#2196f3'
+  }
 });
 
 const entrenceStackNavigator = createStackNavigator({

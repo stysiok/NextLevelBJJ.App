@@ -1,8 +1,10 @@
 import React from 'react';
 import { View, StyleSheet, StatusBar, Image, FlatList } from 'react-native';
-import { Container, Card, CardItem, Left, Right, Body, Text, Icon } from 'native-base';
+import { Container, Card, CardItem, Left, Right, Body, Text, Icon, Content } from 'native-base';
 import { graphQLFetch } from '../extensions/GraphQL';
 import Activity from './sharedScreens/Activity';
+import globalStyles from './../extensions/commonStyles';
+import CardItemWithIcon from './components/CardItemWithIcon';
 
 let passTypes;
 const icons = [{
@@ -66,39 +68,47 @@ export default class Main extends React.Component {
             );
         } else {
             return (
-                <Container>
-                    <StatusBar />
-                        <Image style={styles.backgroundImage} source={require('../assets/images/welcomeBg.jpg')}/>
-                        <View style={styles.overlay} />
-                        <View style={styles.textBox}>
-                            <Text style={styles.greeting}>Dostępne karnety!</Text>
-                        </View>
-                        <View style={{flex: 5}}>
-                            <FlatList 
-                                data={passTypes}
-                                keyExtractor={item => item.id}
-                                renderItem={({item}) => {
-                                    return(
-                                        <View style={{padding: 10}}>
-                                        <Card>
-                                            <CardItem>
-                                                <Left>
-                                                <Icon name={this.getIconForCarnet(item.id)} type="MaterialCommunityIcons" />
-                                                    <Body>
-                                                        <Text>{item.name}</Text>
-                                                        <Text note>Ilość wejść: {item.isOpen ? '∞' : item.entries}</Text>
-                                                    </Body>
-                                                </Left>
-                                                <Right>
-                                                    <Text>{item.price} PLN</Text>
-                                                </Right>
-                                            </CardItem>
-                                        </Card>
-                                    </View>
-                                    );
-                                }}
-                            />
-                        </View>
+                <Container style={globalStyles.background}>
+                <Content padder>
+                <StatusBar />
+                <View style={globalStyles.sectionContainer}>
+                    <View style={globalStyles.sectionHeader}>
+                        <Text style={globalStyles.sectionText}>Dostępne karnety</Text>
+                    </View>
+                    <Content padder>
+                        <FlatList 
+                            data={passTypes}
+                            keyExtractor={item => item.id}
+                            renderItem={({item}) => {
+                                return(
+                                   <Card style={globalStyles.card}>
+                                   <CardItem style={globalStyles.cardItem}>
+                                       <Left>
+                                           <Icon name={this.getIconForCarnet(item.id)} type="MaterialCommunityIcons" style={{color: '#FFF'}}/>
+                                           <Body>
+                                               <Text style={globalStyles.cardText}>{item.name}</Text>
+                                               <Text style={globalStyles.cardText} note>Ilość wejść: {item.isOpen ? '∞' : item.entries}</Text>
+                                           </Body>
+                                       </Left>
+                                       <Right>
+                                           <Text style={globalStyles.cardText}>{item.price} PLN</Text>
+                                       </Right>       
+                                   </CardItem>
+                               </Card>
+                            )}} />
+                    </Content>
+                </View>
+                <View style={globalStyles.sectionContainer}>
+                    <View style={globalStyles.sectionHeader}>
+                        <Text style={globalStyles.sectionText}>Pamiętaj!</Text>
+                    </View>
+                    <Content padder>
+                        <Card style={globalStyles.card}>
+                            <CardItemWithIcon iconName='asterisk' iconColor='#2196f3' text='Każdy karnet jest ważny przez 30 dni od daty zakupu.'/>
+                        </Card>
+                    </Content> 
+                </View>
+                </Content>
                 </Container>
             );
         }

@@ -3,6 +3,8 @@ import { View, StyleSheet, StatusBar, Image, FlatList, Text } from 'react-native
 import { Container, Accordion, Content } from 'native-base';
 import { graphQLFetch } from '../extensions/GraphQL';
 import Activity from './sharedScreens/Activity';
+import globalStyles from './../extensions/commonStyles';
+import DaySchedule from './components/DaySchedule';
 
 let today, week;
 export default class Main extends React.Component { 
@@ -14,34 +16,11 @@ export default class Main extends React.Component {
     }
     
     componentWillMount = async() => {
-        await this.getTrainingDay();
         await this.getTrainingWeek();
         
         week.trainings = week.trainings.filter(el => el.classes.length > 0);
         
         this.setState({ isLoading: false });
-    }
-
-    getTrainingDay = async() => {
-        var response = await await graphQLFetch(`{
-            training{
-              day
-              classes {
-                name
-                startHour
-                finishHour
-              }
-            }
-          }`);
-
-        if(response.data.training != null){
-            today = response.data;
-        } else {
-            this.props.navigation.navigate('Error', {
-                headerText: response.Message ? "Błąd podczas pobierania dnia treningowe" : "Podano błędny kod",
-                text: response.Message ? response.Message : "Nie udało się pobrać dzisiejszego treningu"
-            });
-        }
     }
 
     getTrainingWeek = async() => {
@@ -74,33 +53,18 @@ export default class Main extends React.Component {
             );
         } else {
             return (
-                <Container>
-                    <StatusBar />
-                        <Image style={styles.backgroundImage} source={require('../assets/images/welcomeBg.jpg')}/>
-                        <View style={styles.overlay} />
-                        <View style={styles.today}>
-                            <Text style={styles.heading}>Dziś! ({today.training.day})</Text>
-                            <FlatList
-                            data={today.training.classes}
-                            keyExtractor={item => item.name}
-                            renderItem={({item}) => <Text style={styles.training}> {item.startHour} - {item.finishHour} {item.name}</Text>} />
-                        </View>
-                        <View style={styles.week}>
-                            <Text style={styles.heading}>Pełen tydzień!</Text>
-                            <FlatList
-                            data={week.trainings}
-                            keyExtractor={item => item.day}
-                            renderItem={({item}) => 
-                                    <View>
-                                    <Text style={styles.heading}>{item.day}</Text>
-                                    <FlatList
-                                        data={item.classes}
-                                        keyExtractor={obj => obj.name}
-                                        renderItem={({item: training}) => <Text style={styles.training}> {training.startHour} - {training.finishHour} {training.name}</Text>} />
-                                    </View>
-                                } />
-                        </View>
-                </Container>
+            <Container style={globalStyles.background}>
+                <Content padder>
+                <StatusBar />
+                <FlatList 
+                    data={week.trainings}
+                    keyExtractor={item => item.day}
+                    renderItem={({item}) => 
+                        <DaySchedule trainingDay={item} />
+                    }
+                 />
+                </Content>
+            </Container>               
             );
         }
     }

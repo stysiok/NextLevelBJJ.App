@@ -16,10 +16,10 @@ export default class Welcome extends React.Component{
         await this.loadFonts();
 
         let student = await AsyncStorage.getItem('student');
-        if(student !== null){
+        if (student !== null) {
             this.props.navigation.navigate('Main', {
                 student: JSON.parse(student)
-              });
+            });
         }
         
         this.setState({
@@ -49,7 +49,7 @@ export default class Welcome extends React.Component{
                         Witaj w mobilnej aplikacji klubu Next Level Opole. Sprawdzisz tu ważność karnetu, treninigi na które uczęszczałeś czy plan zajęć.
                     </Text>
                     <Body style={styles.body}>
-                        <Button primary rounded large style={styles.button} onPress={() => {this.props.navigation.navigate('CodeScanner')}}>
+                        <Button large block style={styles.button} onPress={() => {this.props.navigation.navigate('CodeScanner')}}>
                             <Text>{' wczytaj karnet '.toUpperCase()}</Text>
                         </Button>
                     </Body>
@@ -57,7 +57,7 @@ export default class Welcome extends React.Component{
             );
         }else{
             return(
-                <Activity headerText="Zczytuję ustawienia" />
+                <Activity headerText="Wczytuję ustawienia" />
             );
         }
     }
@@ -107,5 +107,10 @@ const styles = StyleSheet.create({
         flex: 4,
         justifyContent: 'center',
         alignItems: 'center'
+    },
+    button:{
+        alignSelf: 'center',
+        color: "white",
+        backgroundColor: '#2196f3'
     }    
 });

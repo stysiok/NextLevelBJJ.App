@@ -1,14 +1,15 @@
 import React from 'react';
-import { Alert, View, StyleSheet, StatusBar, Image } from 'react-native';
-import { Container, Icon, Button, Text } from 'native-base';
+import { Alert, View, StyleSheet, StatusBar, Image, AsyncStorage } from 'react-native';
+import { Container, Content, Icon, Button, Text, Card, CardItem, Body } from 'native-base';
 import { graphQLFetch } from '../extensions/GraphQL';
 import Modal from 'react-native-modal';
 import moment from 'moment';
+import globalStyles from './../extensions/commonStyles';
 import Activity from './sharedScreens/Activity';
 import Training from './components/Training';
 import QRCode from 'react-native-qrcode-svg';
+import CardItemWithIcon from './components/CardItemWithIcon';
 
-let student;
 export default class Main extends React.Component { 
     constructor(){
         super();
@@ -20,14 +21,30 @@ export default class Main extends React.Component {
     }
     
     componentWillMount = async() => {
-        await this.getStudentPass();
+        
+        let storedStudent = await AsyncStorage.getItem('student');
+        let student = JSON.parse(storedStudent);
+
+        let response = await this.getStudentPass(student.passCode);
+        
+        console.log(response);
+
+        if(response.data.student != null){
+            student = response.data.student;
+            this.setState({student: student} , () => this.setState({ isLoading: false }))
+        } else {
+            this.props.navigation.navigate('Error', {
+                headerText: response.Message ? "Błąd podczas pobierania karnetu" : "Podano błędny kod",
+                text: response.Message ? response.Message : "Karnet klubowicza nie istnieje w bazie danych"
+            });
+        }
     }
 
-    getStudentPass = async() => {
-        let passCode = this.props.navigation.getParam('passCode');
-
+    getStudentPass = async(passCode) => {
         var response = await graphQLFetch(`{
             student(passCode:"${passCode}"){
+                firstName
+                lastName
                 lastAttendance{
                     createdDate
                     classAttended{
@@ -48,16 +65,7 @@ export default class Main extends React.Component {
                   }
             }
           }`);
-
-        if(response.data.student != null){
-            student = response.data.student;
-            this.setState({student: student} , () => this.setState({ isLoading: false }))
-        } else {
-            this.props.navigation.navigate('Error', {
-                headerText: response.Message ? "Błąd podczas pobierania karnetu" : "Podano błędny kod",
-                text: response.Message ? response.Message : "Karnet klubowicza nie istnieje w bazie danych"
-            });
-        }
+        return response;
     }
 
     signInForTraining = async() => {
@@ -93,7 +101,7 @@ export default class Main extends React.Component {
             );
         } else {
             return (
-                <Container>
+                <Container style={globalStyles.background}>
                     <Modal 
                         isVisible={this.state.modalVisible}
                         onBackdropPress={() => this.setState({ modalVisible: false })}
@@ -111,45 +119,41 @@ export default class Main extends React.Component {
                             </Button>
                         </View>
                     </Modal>
+                    <Content padder>
                     <StatusBar />
-                        <Image style={styles.backgroundImage} source={require('../assets/images/welcomeBg.jpg')}/>
-                        <View style={styles.overlay} />
-                        <View style={styles.textBox}>
-                            <Text style={styles.greeting}>Twój aktualny karnet!</Text>
+                    <View style={globalStyles.sectionContainer}>
+                        <View style={globalStyles.sectionHeader}>
+                            <Text style={globalStyles.sectionText}>Aktualny karnet</Text>
                         </View>
-                        <View style={styles.passInfoContainer}>
-                            <Text style={styles.passInfo}>
-                                <Icon name="chess-king" type="MaterialCommunityIcons" style={styles.icon} /> 
-                                Nazwa karnetu : {this.state.student.recentPass.passType.name}
-                            </Text>
-                            <Text style={styles.passInfo}>
-                                <Icon name="bank" type="MaterialCommunityIcons" style={styles.icon} /> 
-                                Cena : {this.state.student.recentPass.price}zł</Text>
-                            <Text style={styles.passInfo}>
-                                <Icon name="calendar-check" type="MaterialCommunityIcons" style={styles.icon} /> 
-                                Zakupiony : {moment(this.state.student.recentPass.createdDate).format('DD/MM/YYYY')}</Text>
-                            <Text style={styles.passInfo}>
-                                <Icon name="calendar-remove" type="MaterialCommunityIcons" style={styles.icon} /> 
-                                Wygaśnie : {moment(this.state.student.recentPass.expirationDate).format('DD/MM/YYYY')}</Text>
-                            <Text style={styles.passInfo}>
-                                <Icon name="calendar-multiselect" type="MaterialCommunityIcons" style={styles.icon} /> 
-                                Pozostało wejść : {this.state.student.recentPass.remainingEntries < 31 ? this.state.student.recentPass.remainingEntries : "brak limitu" }</Text>
-                            <Text style={styles.passInfo}><Icon name="calendar" type="MaterialCommunityIcons" style={styles.icon} /> 
-                            Ostatni odbyty trening : </Text>
+                        <Content padder>
+                            <Card style={globalStyles.card}>
+                                <CardItemWithIcon iconName='human-greeting' text={`Posiadacz: ${this.state.student.firstName} ${this.state.student.lastName}`} />
+                                <CardItemWithIcon iconName='chess-king' text={`Typ karnetu: ${this.state.student.recentPass.passType.name}`} />
+                                <CardItemWithIcon iconName='cash-multiple' text={`Cena: ${this.state.student.recentPass.price} PLN`} />
+                                <CardItemWithIcon iconName='calendar-check' text={`Zakupiony: ${moment(this.state.student.recentPass.createdDate).format('DD/MM/YYYY')}`} />
+                                <CardItemWithIcon iconName='calendar-remove' text={`Wygaśnie: ${moment(this.state.student.recentPass.expirationDate).format('DD/MM/YYYY')}`} />
+                                <CardItemWithIcon iconName='calendar-multiselect' text={`Pozostało wejść: ${this.state.student.recentPass.passType.isOpen ?  "brak limitu" : this.state.student.recentPass.remainingEntries }`} />
+                            </Card>
+                        </Content>
+                    </View>
+                        <View style={globalStyles.sectionContainer}>
+                            <View style={globalStyles.sectionHeader}>
+                                <Text style={globalStyles.sectionText}>Zapisz się na trening</Text>
+                            </View>
+                            <Content padder>
+                                <View style={styles.buttonsContainer}>
+                                <Button block iconLeft style={styles.button} onPress={() => { this.signInForTraining() }}>
+                                    <Icon name="account-multiple-check" type="MaterialCommunityIcons" />
+                                    <Text> Zapisz się </Text>
+                                </Button>
+                                <Button block iconLeft style={styles.button} onPress={() => { this.setState({ modalVisible: true })}}>
+                                    <Icon name="qrcode" type="MaterialCommunityIcons" />
+                                    <Text> Wygeneruj </Text>
+                                </Button>
+                                </View>
+                            </Content>
                         </View>
-                        <View style={styles.lastAttendanceContainer}>
-                            <Training attendance={this.state.student.lastAttendance} />
-                        </View>
-                        <View style={styles.buttonsContainer}>
-                            <Button block iconLeft style={styles.button} onPress={() => { this.signInForTraining() }}>
-                                <Icon name="account-multiple-check" type="MaterialCommunityIcons" />
-                                <Text> Zapisz się </Text>
-                            </Button>
-                            <Button block iconLeft style={styles.button} onPress={() => { this.setState({ modalVisible: true })}}>
-                                <Icon name="qrcode" type="MaterialCommunityIcons" />
-                                <Text> Wygeneruj </Text>
-                            </Button>
-                        </View>
+                    </Content>
                 </Container>
             );
         }
@@ -157,67 +161,16 @@ export default class Main extends React.Component {
 }
 
 const styles = StyleSheet.create({
-    backgroundImage: {
-        flex: 1,
-        resizeMode: 'cover',
-        position: 'absolute',
-        width: '100%',
-        height: '100%',
-        justifyContent: 'center'
-    },
-    overlay: {
-        ...StyleSheet.absoluteFillObject,
-        backgroundColor: 'rgba(0, 0, 0, 0.75)'
-    },
-    textBox:{
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center'
-    },
-    greeting:{
-        backgroundColor: 'transparent',
-        color: '#ffffff',
-        fontSize: 35,
-        fontWeight: 'bold'
-    },
-    passInfoContainer:{
-        flex: 3,
-        justifyContent: 'space-around',
-        alignItems: 'center'
-    },
-    passInfo:{
-        backgroundColor: 'transparent',
-        color: '#ffffff',
-        fontSize: 20,
-    },
-    icon:{
-        fontSize: 20,
-        color: "white"
-    },
-    lastAttendanceContainer:{
-        flex: 2,
-        justifyContent: 'space-around',
-    },
-    center:{
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    lastAttendance:{
-        backgroundColor: 'transparent',
-        color: '#ffffff',
-        fontSize: 25,
+    button:{
+        alignSelf: 'center',
+        color: "white",
+        backgroundColor: '#2196f3'
     },
     buttonsContainer:{
         flex: 1,
         flexDirection: 'row',
         justifyContent: 'space-around',
         alignItems: 'center'
-    },
-    button:{
-        alignSelf: 'center',
-        color: "white",
-        backgroundColor: 'black'
     },
 });
 

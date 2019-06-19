@@ -1,10 +1,13 @@
 import React from 'react';
-import { Alert, AsyncStorage,View, StyleSheet, StatusBar, Image } from 'react-native';
-import { Container, Button, Text, Icon, Content, Card, CardItem, Left, Body } from 'native-base';
+import { View, StatusBar } from 'react-native';
+import { Container, Text, Content, Card } from 'native-base';
 import Activity from './sharedScreens/Activity';
-import { HeaderBackButton } from 'react-navigation';
 import { graphQLFetch } from '../extensions/GraphQL';
+import globalStyles from '../extensions/commonStyles';
 import moment from 'moment';
+import Training from './components/Training';
+import CardItemWithIcon from './components/CardItemWithIcon';
+import DaySchedule from './components/DaySchedule';
 
 export default class Main extends React.Component { 
     constructor(){
@@ -64,6 +67,8 @@ export default class Main extends React.Component {
               classes{
                 day
                 finishHour
+                startHour
+                name
               }
               day
             }
@@ -88,68 +93,32 @@ export default class Main extends React.Component {
                 let isPassActive = moment(this.state.student.recentPass.expirationDate).isAfter(moment.now);
                 let passActivityText = `${ isPassActive ? 'Aktywny': 'Nieaktywny' } (${ isPassActive ? 'do' : 'od'} ${moment(this.state.student.recentPass.expirationDate).format('DD/MM/YYYY')})`;
                 let passUsageText = `${ isPassActive ? `Pozostało` : `Wykorzystałeś`} ${isPassActive ? `${this.state.student.recentPass.passType.isOpen ? `∞` : `${this.state.student.recentPass.remainingEntries}`}` : `${this.state.student.recentPass.passType.entries - this.state.student.recentPass.remainingEntries}` } z ${this.state.student.recentPass.passType.isOpen ? `∞` : `${this.state.student.recentPass.passType.entries}`} wejść`;
+                let activityColor = isPassActive ? '#b2ff59' : '#CF6679';
+                console.log(this.state.trainingDay);
                 return (
-                    <Container style={{backgroundColor: '#121212'}}>
+                    <Container style={globalStyles.background}>
                         <Content padder>
                         <StatusBar />
-                        <Text style={styles.greeting}>Oss {this.state.student.firstName}!</Text>
-                        <View style={styles.sectionContainer}>
-                            <View style={styles.sectionHeader}>
-                                <Text style={styles.sectionText}>Aktualny karnet</Text>
+                        <View style={globalStyles.sectionContainer}>
+                            <View style={globalStyles.sectionHeader}>
+                                <Text style={globalStyles.sectionText}>Stan karnetu</Text>
                             </View>
                             <Content padder>
-                                <Card >
-                                    <CardItem>
-                                            <Body>
-                                                <Text><Icon name={isPassActive ? "check-circle" : "close-circle"} type="MaterialCommunityIcons" /> {passActivityText}</Text>
-                                                <Text><Icon name="calendar-multiselect" type="MaterialCommunityIcons" /> {passUsageText}</Text>
-                                            </Body>
-                                    </CardItem>
+                                <Card style={globalStyles.card}>                                   
+                                    <CardItemWithIcon iconName={isPassActive ? "check-circle" : "close-circle"} iconColor={activityColor} text={passActivityText} />
+                                    <CardItemWithIcon iconName="calendar-multiselect" text={passUsageText} />
                                 </Card>
                             </Content>
                         </View>
-                        <View style={styles.sectionContainer}>
-                            <View style={styles.sectionHeader}>
-                                <Text style={styles.sectionText}>Ostatni odbyty trening</Text>
+                        <View style={globalStyles.sectionContainer}>
+                            <View style={globalStyles.sectionHeader}>
+                                <Text style={globalStyles.sectionText}>Ostatni odbyty trening</Text>
                             </View>
                                 <Content padder>
-                                   <Card >
-                                        <CardItem>
-                                                <Body>
-                                                    <Text>BJJ nowy nabór</Text>
-                                                    <Text>Poniedziałek o 17:15</Text>
-                                                </Body>
-                                        </CardItem>
-                                    </Card>
+                                   <Training attendance={this.state.student.lastAttendance} />
                                 </Content>
                         </View>
-                        <View style={styles.sectionContainer}>
-                            <View style={styles.sectionHeader}>
-                                <Text style={styles.sectionText}>Dzisiejsze zajęcia</Text>
-                            </View>
-                                <Content padder>
-                                   <Card >
-                                        <CardItem>
-                                                <Body>
-                                                    <Text>BJJ nowy nabór</Text>
-                                                    <Text>Poniedziałek o 17:15</Text>
-                                                </Body>
-                                        </CardItem>
-                                        <CardItem>
-                                                <Body>
-                                                    <Text>BJJ nowy nabór</Text>
-                                                    <Text>Poniedziałek o 17:15</Text>
-                                                </Body>
-                                        </CardItem>
-                                        <CardItem>
-                                                <Body>
-                                                    <Text>BJJ nowy nabór</Text>
-                                                    <Text>Poniedziałek o 17:15</Text>
-                                                </Body>
-                                        </CardItem>
-                                    </Card>
-                                </Content>
-                        </View>
+                        <DaySchedule trainingDay={this.state.trainingDay} text='Dzisiejsze treningi'/>
                         </Content>
                     </Container>
                 );
@@ -158,26 +127,6 @@ export default class Main extends React.Component {
         }
     }
 }
-
-const styles = StyleSheet.create({
-    greeting:{
-        color: '#ffffff',
-        fontSize: 40,
-        fontWeight: 'bold'
-    },
-    sectionContainer: {
-      flex: 1
-    },
-    sectionHeader:{
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center'
-    },
-    sectionText:{
-        color: '#ffffff',
-        fontSize: 20
-    }
-});
 
 // static navigationOptions = ({navigation}) => {
 //     return{
