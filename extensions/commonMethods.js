@@ -1,7 +1,7 @@
 export const getTrainingImage = (trainingName) => {
     const trainingImages = [
         {
-            training: "BJJ NO-GI NOWY NABÓR",
+            training: "BJJ NOWY NABÓR",
             image: require('./../assets/images/nogi_nowy.jpg')
         },
         {
@@ -13,23 +13,27 @@ export const getTrainingImage = (trainingName) => {
             image: require('./../assets/images/nogi_zaawansowana.jpg')
         },
         {
-            training: "BJJ NOGI ZAWODNICY",
-            image: require('./../assets/images/nogi_zaawansowana.jpg')
-        },
-        {
             training: "MMA ZAWODNICY",
             image: require('./../assets/images/mma_zawodnicy.jpg')
         },
         {
-            training: "ZAPASY NOWY NABÓR",
-            image: require('./../assets/images/zapasy.jpg')
+            training: "MMA ZAWODNICY / ZAPASY",
+            image: require('./../assets/images/mma_zawodnicy.jpg')
         },
         {
-            training: "BJJ GI DLA WSZYSTKICH",
+            training: "BJJ GI FUNDAMENTY",
             image: require('./../assets/images/bjjgi.jpg')
         },
         {
-            training: "GOOD MORNING BJJ (GI  NOGI)",
+            training: "BJJ GI / SPARINGI",
+            image: require('./../assets/images/bjjsparingi.jpg')
+        },
+        {
+            training: "GOOD MORNING BJJ",
+            image: require('./../assets/images/goodmorning.jpg')
+        },        
+        {
+            training: "GOOD MORNING BJJ / MMA",
             image: require('./../assets/images/goodmorning.jpg')
         },
         {
@@ -37,7 +41,11 @@ export const getTrainingImage = (trainingName) => {
             image: require('./../assets/images/mma_nowy.jpg')
         },
         {
-            training: "WOLNA MATA (DO UZGODNIENIA NA GRUPIE FB)",
+            training: "BJJ MEDIUM",
+            image: require('./../assets/images/bjjmedium.jpg')
+        },        
+        {
+            training: "SPARINGI / DRILLE",
             image: require('./../assets/images/wolnamata.jpg')
         },
         {

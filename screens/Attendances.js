@@ -19,14 +19,13 @@ export default class Attendances extends React.Component {
     }
     
     componentWillMount = async() => {
-        
         let storedStudent = await AsyncStorage.getItem('student');
         let student = JSON.parse(storedStudent);
-        console.log(student);
+        
         let id = parseInt(student.id, 10);
-        console.log(id);
+        this.setState({id: id});
 
-        let response = await this.getAttendances(id);
+        let response = await this.getAttendances();
         
         console.log(response);
         if(response.data.attendances != null) {
@@ -41,9 +40,9 @@ export default class Attendances extends React.Component {
         this.setState({ isLoading: false });
     }
 
-    getAttendances = async(studentId) => {
+    getAttendances = async() => {
         return await graphQLFetch(`{ 
-            attendances(studentId: ${studentId}, take: ${this.state.take}, skip: ${this.state.skip}){
+            attendances(studentId: ${this.state.id}, take: ${this.state.take}, skip: ${this.state.skip}){
                 createdDate
                 classAttended{
                     day

@@ -118,7 +118,20 @@ export default class Main extends React.Component {
                                    <Training attendance={this.state.student.lastAttendance} />
                                 </Content>
                         </View>
-                        <DaySchedule trainingDay={this.state.trainingDay} text='Dzisiejsze treningi'/>
+                        {this.state.trainingDay.classes.length === 0 ? (
+                            <View style={globalStyles.sectionContainer}>
+                            <View style={globalStyles.sectionHeader}>
+                                <Text style={globalStyles.sectionText}>Dzisiejsze treningi ({this.state.trainingDay.day})</Text>
+                            </View>
+                            <Content padder>
+                                <Card style={globalStyles.card}>                                   
+                                    <CardItemWithIcon iconName="battery-charging-70" text="Dziś nie ma żadnych treningów. Naładuj baterie na kolejne sparingi!" />
+                                </Card>
+                            </Content>
+                        </View>
+                        ) : (
+                            <DaySchedule trainingDay={this.state.trainingDay} text='Dzisiejsze treningi'/>
+                        ) }
                         </Content>
                     </Container>
                 );
